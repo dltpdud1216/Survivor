@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93ddc2b146883d4aaa4ac35e7e4636b, type: 3}
+  m_Name: Magnet
+  m_EditorClassIdentifier: Assembly-CSharp::Survivor.SkillData
+  type: 1
+  skillName: "\uC790\uC11D"
+  id: 103
+  skillIcon: {fileID: 1969235620431771271, guid: e19ae015f4fcac34b95a97a99479ce7c,
+    type: 3}
+  description: 
+  requiredActiveId: 0
+  requiredPassiveId: 0
+  damage: 0
+  range: 0
+  speed: 0

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93ddc2b146883d4aaa4ac35e7e4636b, type: 3}
+  m_Name: Magic Hourglass
+  m_EditorClassIdentifier: Assembly-CSharp::Survivor.SkillData
+  type: 1
+  skillName: "\uB9C8\uBC95 \uC2DC\uACC4"
+  id: 107
+  skillIcon: {fileID: 4556492525550180466, guid: d10cc8a69b52fe24eb3bae775f401068,
+    type: 3}
+  description: 
+  requiredActiveId: 0
+  requiredPassiveId: 0
+  damage: 0
+  range: 0
+  speed: 0
