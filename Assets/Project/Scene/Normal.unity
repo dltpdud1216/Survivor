@@ -3467,10 +3467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a291c60948f753428132c1ff814039e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.FireballSkill
-  fireballPrefab: {fileID: 6772435744090452508, guid: 00fbfba08b1cf744eb6ba00f565111f4,
+  fireballPrefab: {fileID: 48889541432503116, guid: e4d8ea156e348034a95defbe70875e5d,
     type: 3}
+  shootInterval: 2
   damage: 15
-  fireRate: 1.2
+  projectileSpeed: 10
 --- !u!114 &973456068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3483,10 +3484,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d70aa36292b20e4582de9a7f88ec2ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.FrostBoltSkill
-  frostBoltPrefab: {fileID: 5399798732957665357, guid: 6f6d0c50cc7157c4bad14548c9ffba83,
+  frostBoltPrefab: {fileID: 1504204501986783231, guid: 7e70fba4f68bdb74eadb7c3bd0a86e84,
     type: 3}
+  shootInterval: 1.5
   damage: 10
-  fireRate: 0.8
+  projectileSpeed: 12
+  freezeDuration: 2
 --- !u!114 &973456069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3947,12 +3950,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b2370113952464c42bbdf4618ca7a367, type: 2}
   - {fileID: 11400000, guid: c96f172377452b2439b1e27d976e33e5, type: 2}
   - {fileID: 11400000, guid: 64b2927a2c4a58c4c9a5a165d13394db, type: 2}
-  playerActiveSkills:
-  - {fileID: 973456065}
-  - {fileID: 973456067}
-  - {fileID: 973456068}
-  - {fileID: 973456069}
-  - {fileID: 973456066}
+  playerObject: {fileID: 973456057}
 --- !u!114 &1092124202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4251,12 +4249,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b2370113952464c42bbdf4618ca7a367, type: 2}
   - {fileID: 11400000, guid: c96f172377452b2439b1e27d976e33e5, type: 2}
   - {fileID: 11400000, guid: 64b2927a2c4a58c4c9a5a165d13394db, type: 2}
-  playerActiveSkills:
-  - {fileID: 973456065}
-  - {fileID: 973456067}
-  - {fileID: 973456068}
-  - {fileID: 973456069}
-  - {fileID: 973456066}
+  playerObject: {fileID: 0}
 --- !u!1 &1218133815
 GameObject:
   m_ObjectHideFlags: 0

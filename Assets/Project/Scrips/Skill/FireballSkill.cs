@@ -1,49 +1,75 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Survivor
 {
     public class FireballSkill : MonoBehaviour
     {
+        [Header("Settings")]
         public GameObject fireballPrefab;
-        public float damage = 15f;
-        public float fireRate = 1.2f;
+        public float shootInterval = 2f;
+        public float damage = 10f;
+        public float projectileSpeed = 10f;
+
         private float timer;
 
-        void Update()
+        private void OnEnable()
+        {
+            Debug.Log("화염구 스킬 활성화!");
+            // 😤 [수정] 시작하자마자 쏘지 않도록 0으로 초기화
+            timer = 0f;
+        }
+
+        private void Update()
         {
             timer += Time.deltaTime;
-            if (timer >= fireRate)
+
+            if (timer >= shootInterval)
             {
                 Shoot();
-                timer = 0;
+                timer = 0f;
             }
         }
 
         void Shoot()
         {
-            GameObject target = FindClosestEnemy();
-            if (target == null) return;
+            GameObject targetObj = FindNearestEnemy();
 
-            // ����ü ���� �� ���� ����
-            GameObject go = Instantiate(fireballPrefab, transform.position, Quaternion.identity);
-            Vector2 dir = (target.transform.position - transform.position).normalized;
+            // 😤 타겟이 없으면 플레이어 정면, 있으면 적 방향
+            Vector3 shootDir = targetObj != null ?
+                (targetObj.transform.position - transform.position).normalized :
+                transform.right; // 2D면 보통 right가 정면
 
-            // ���� Projectile ��ũ��Ʈ ���
-            go.GetComponent<Projectile>().Setup(dir, damage, 8f);
+            // 생성 시 회전값 계산
+            float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg;
+            Quaternion spawnRotation = Quaternion.Euler(0, 0, angle);
+
+            GameObject go = Instantiate(fireballPrefab, transform.position, spawnRotation);
+            go.transform.SetParent(null);
+
+            Projectile proj = go.GetComponent<Projectile>();
+            if (proj != null)
+            {
+                // 타겟 정보를 넘겨줘야 Projectile이 날아갑니다 😤
+                proj.Setup(shootDir, damage, projectileSpeed, 0f, targetObj != null ? targetObj.transform : null);
+            }
         }
 
-        GameObject FindClosestEnemy()
+        GameObject FindNearestEnemy()
         {
             GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            GameObject closest = null;
+            GameObject nearest = null;
             float minDistance = Mathf.Infinity;
 
             foreach (GameObject enemy in enemies)
             {
-                float dist = Vector2.Distance(transform.position, enemy.transform.position);
-                if (dist < minDistance) { closest = enemy; minDistance = dist; }
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearest = enemy;
+                }
             }
-            return closest;
+            return nearest;
         }
     }
 }

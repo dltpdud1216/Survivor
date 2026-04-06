@@ -15,9 +15,10 @@ namespace Survivor
         [Header("Skill Pool")]
         [SerializeField] private List<SkillData> allSkillDatabase = new List<SkillData>();
 
-        [Header("Player Skills Reference")]
-        [SerializeField] private List<MonoBehaviour> playerActiveSkills = new List<MonoBehaviour>();
+        [Header("Player Reference")]
+        [SerializeField] private GameObject playerObject;
 
+        private List<MonoBehaviour> playerActiveSkills = new List<MonoBehaviour>();
         private List<SkillData> currentOptions = new List<SkillData>();
         private bool isFirstSelect = true;
 
@@ -31,139 +32,130 @@ namespace Survivor
             { "자석", "magnet" }, { "힘의 원석", "powercrystal" }
         };
 
-        void Awake()
+        void Start()
         {
-            // 스킬 데이터 레벨 초기화
-            foreach (var skill in allSkillDatabase) skill.level = 0;
+            RefreshPlayerReference();
+            SetupButtons();
+            ShowRandomSkillSelection();
+        }
 
-            // 버튼 리스너 등록 (람다식 클로저 방지를 위해 index 변수 따로 선언)
+        private void SetupButtons()
+        {
             for (int i = 0; i < skillChoiceButtons.Count; i++)
             {
                 int index = i;
+                if (skillChoiceButtons[i] == null) continue;
+
                 skillChoiceButtons[i].onClick.RemoveAllListeners();
-                skillChoiceButtons[i].onClick.AddListener(() => OnSkillSelected(index));
+                skillChoiceButtons[i].onClick.AddListener(() => {
+                    OnSkillSelected(index);
+                });
             }
         }
 
-        void Start()
+        public void RefreshPlayerReference()
         {
-            // 씬 시작하자마자 첫 스킬 선택창 띄우기
-            ShowRandomSkillSelection();
+            if (playerObject == null) playerObject = GameObject.FindWithTag("Player");
+
+            if (playerObject != null)
+            {
+                playerActiveSkills = playerObject.GetComponentsInChildren<MonoBehaviour>(true).ToList();
+            }
         }
 
         public void ShowRandomSkillSelection()
         {
             if (skillPanel != null) skillPanel.SetActive(true);
+            Time.timeScale = 0f;
 
-            Time.timeScale = 0f; // 게임 일시정지
-            currentOptions.Clear();
+            // 1. 기본 필터링 (널 체크 및 만렙 제외)
+            var filteredPool = allSkillDatabase.Where(s => s != null && s.level < 8).ToList();
 
-            List<SkillData> filteredPool = new List<SkillData>();
+            // 2. 첫 선택 시 액티브 스킬 강제 필터링 (얼음 화살 타입 확인 필수! 😤)
             if (isFirstSelect)
             {
-                filteredPool = allSkillDatabase.Where(s => s.type == SkillType.Active).ToList();
-            }
-            else
-            {
-                filteredPool = allSkillDatabase.Where(s => s.type == SkillType.Active || s.type == SkillType.Passive).ToList();
-                var evoPool = allSkillDatabase.Where(s => s.type == SkillType.Evolution).ToList();
-                foreach (var evo in evoPool) if (CanEvolve(evo)) filteredPool.Add(evo);
-            }
+                var activeOnly = filteredPool.Where(s => s.type == SkillType.Active).ToList();
 
-            filteredPool = filteredPool.Where(s => s.level < 8).ToList();
-
-            if (filteredPool.Count == 0)
-            {
-                ResumeGame();
-                return;
-            }
-
-            currentOptions = filteredPool.OrderBy(x => Random.value).Take(skillChoiceButtons.Count).ToList();
-            UpdateUI();
-        }
-
-        private bool CanEvolve(SkillData evo)
-        {
-            bool activeReady = allSkillDatabase.Any(s => s.id == evo.requiredActiveId && s.level >= 8);
-            bool passiveReady = allSkillDatabase.Any(s => s.id == evo.requiredPassiveId && s.level >= 1);
-            return activeReady && passiveReady;
-        }
-
-        private void UpdateUI()
-        {
-            foreach (var btn in skillChoiceButtons) btn.gameObject.SetActive(false);
-
-            for (int i = 0; i < currentOptions.Count; i++)
-            {
-                skillChoiceButtons[i].gameObject.SetActive(true);
-
-                // 아이콘 설정
-                var iconTransform = skillChoiceButtons[i].transform.Find("Icon");
-                if (iconTransform != null) iconTransform.GetComponent<Image>().sprite = currentOptions[i].skillIcon;
-
-                // 텍스트 설정 (Lv 표시)
-                var textTransform = skillChoiceButtons[i].transform.Find("Text (TMP)");
-                if (textTransform != null)
+                // 만약 액티브 필터링 후 개수가 너무 적으면 전체 풀 사용 (안전장치)
+                if (activeOnly.Count >= skillChoiceButtons.Count)
                 {
-                    string levelText = currentOptions[i].level > 0 ? $" Lv.{currentOptions[i].level + 1}" : " New!";
-                    textTransform.GetComponent<TextMeshProUGUI>().text = currentOptions[i].skillName + levelText;
+                    filteredPool = activeOnly;
                 }
             }
+
+            // 3. 랜덤 셔플 및 추출
+            currentOptions = filteredPool.OrderBy(x => Random.value).Take(skillChoiceButtons.Count).ToList();
+
+            // 4. 로그로 결과 확인 (얼음 화살이 포함되었는지 콘솔에서 바로 확인 가능)
+            foreach (var opt in currentOptions) Debug.Log($"🎲 선택지에 등장: {opt.skillName}");
+
+            UpdateUI();
         }
 
         public void OnSkillSelected(int index)
         {
-            Debug.Log($"버튼 클릭됨! 선택한 인덱스: {index}");
-
-            if (index < 0 || index >= currentOptions.Count) return;
-
-            // 1. 선택한 스킬 데이터 업데이트
-            SkillData selected = currentOptions[index];
-            selected.level++;
-
-            // 2. 실제 스킬 스크립트 활성화 (에러 방지를 위해 try-catch)
             try
             {
-                ActivateSkillScript(selected.skillName);
+                if (index >= 0 && index < currentOptions.Count)
+                {
+                    SkillData selected = currentOptions[index];
+
+                    selected.level++;
+                    ActivateSkillScript(selected.skillName);
+                }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"스킬 활성화 중 에러 발생: {e.Message}");
             }
-
-            if (isFirstSelect) isFirstSelect = false;
-
-            // 3. 무조건 게임 재개 😤
-            ResumeGame();
+            finally
+            {
+                if (isFirstSelect) isFirstSelect = false;
+                ResumeGame();
+            }
         }
 
         private void ActivateSkillScript(string displayName)
         {
             string searchKey = displayName.Trim();
-            string englishName = skillNameMap.ContainsKey(searchKey) ? skillNameMap[searchKey] : searchKey.Replace(" ", "").ToLower();
+            string englishKeyword = skillNameMap.ContainsKey(searchKey) ? skillNameMap[searchKey] : searchKey.Replace(" ", "").ToLower();
 
-            bool found = false;
-            foreach (var skillScript in playerActiveSkills)
+            foreach (var script in playerActiveSkills)
             {
-                if (skillScript != null && skillScript.GetType().Name.ToLower().Contains(englishName))
+                if (script == null) continue;
+                string className = script.GetType().Name.ToLower();
+
+                if (className.Contains(englishKeyword.ToLower()))
                 {
-                    skillScript.enabled = true;
-                    found = true;
-                    break;
+                    script.enabled = true;
+                    return;
                 }
             }
-
-            if (!found) Debug.LogWarning($"{displayName}에 해당하는 스크립트를 playerActiveSkills에서 찾지 못했습니다.");
         }
 
         private void ResumeGame()
         {
-            Debug.Log("ResumeGame 호출됨: 패널을 끄고 시간을 다시 흐르게 합니다.");
-
             if (skillPanel != null) skillPanel.SetActive(false);
-
-            // 일시정지 해제 😤
             Time.timeScale = 1f;
+        }
+
+        private void UpdateUI()
+        {
+            // 모든 버튼 일단 비활성화
+            foreach (var btn in skillChoiceButtons) btn.gameObject.SetActive(false);
+
+            // 옵션 개수만큼 버튼 활성화 및 데이터 매핑
+            for (int i = 0; i < currentOptions.Count; i++)
+            {
+                if (i >= skillChoiceButtons.Count) break;
+
+                skillChoiceButtons[i].gameObject.SetActive(true);
+
+                var txt = skillChoiceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+                if (txt != null) txt.text = currentOptions[i].skillName;
+
+                var icon = skillChoiceButtons[i].GetComponentsInChildren<Image>(true).FirstOrDefault(x => x.gameObject.name == "Icon");
+                if (icon != null) icon.sprite = currentOptions[i].skillIcon;
+            }
         }
     }
 }

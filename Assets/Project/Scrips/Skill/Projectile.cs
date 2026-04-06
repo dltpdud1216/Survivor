@@ -1,45 +1,131 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
-public class Projectile : MonoBehaviour
+namespace Survivor
 {
-    private Vector2 direction;
-    private float speed;
-    private float damage;
-    private bool isSlow;
+    // [Enum 선언] 클래스 바깥에 두어 외부 참조 에러 방지 😤
+    public enum ProjectileType { Explosion, Penetration }
 
-    public void Setup(Vector2 dir, float dmg, float spd, bool slow = false)
+    public class Projectile : MonoBehaviour
     {
-        direction = dir;
-        damage = dmg;
-        speed = spd;
-        isSlow = slow;
+        [Header("Settings")]
+        public ProjectileType type;
+        public int pierceCount = 0;
+        public float explosionRadius = 2.0f;
+        public Vector3 forcedScale = new Vector3(0.5f, 0.5f, 0.5f);
 
-        // 투사체가 날아가는 방향을 바라보게 회전
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        [Header("Direction Fix")]
+        public float rotationOffset = 90f;
 
-        Destroy(gameObject, 5f); // 화면 밖으로 나갈 걸 대비해 5초 뒤 삭제
-    }
+        private float speed;
+        private float damage;
+        private Vector3 direction;
+        private Transform target;
+        private int currentPierce = 0;
+        private bool isDead = false;
+        private bool isInitialized = false;
+        private HashSet<GameObject> hitEnemies = new HashSet<GameObject>();
 
-    void Update()
-    {
-        transform.Translate(Vector2.right * speed * Time.deltaTime);
-    }
+        // 렌더러와 콜라이더 참조
+        private SpriteRenderer spriteRenderer;
+        private Collider2D bodyCollider;
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Enemy"))
+        void Awake()
         {
-            // 몬스터 데미지 로직 실행
-            // collision.GetComponent<Enemy>().TakeDamage(damage);
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            bodyCollider = GetComponent<Collider2D>();
 
-            if (isSlow)
+            // 😤 [중요] 생성되자마자 일단 숨기고 충돌도 막습니다. (잔상 방지)
+            if (spriteRenderer != null) spriteRenderer.enabled = false;
+            if (bodyCollider != null) bodyCollider.enabled = false;
+        }
+
+        public void Setup(Vector3 dir, float dmg, float projSpeed, float extra, Transform targetEnemy = null)
+        {
+            // 데이터 할당
+            this.direction = dir.normalized;
+            this.damage = dmg;
+            this.speed = projSpeed;
+            this.target = targetEnemy;
+
+            // 물리/위치 초기화
+            transform.SetParent(null);
+            transform.localScale = forcedScale;
+
+            // 😤 [핵심] Setup이 호출된 이 순간에만 모습과 충돌을 켭니다.
+            if (spriteRenderer != null) spriteRenderer.enabled = true;
+            if (bodyCollider != null) bodyCollider.enabled = true;
+
+            RotateTowardsDirection();
+            isInitialized = true;
+            Destroy(gameObject, 3f);
+        }
+
+        private void Update()
+        {
+            // 셋업 전이거나 죽었다면 이동 금지 😤
+            if (!isInitialized || isDead) return;
+
+            if (target != null && target.gameObject.activeInHierarchy)
             {
-                // 슬로우 로직 추가 (예: 적 이동속도 절반으로)
-                Debug.Log("얼음 화살! 적 이동속도 감소 ❄️");
+                direction = (target.position - transform.position).normalized;
             }
 
-            Destroy(gameObject); // 적중 시 투사체 삭제
+            RotateTowardsDirection();
+            transform.position += direction * speed * Time.deltaTime;
+        }
+
+        private void RotateTowardsDirection()
+        {
+            if (direction != Vector3.zero)
+            {
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0, 0, angle + rotationOffset);
+            }
+        }
+
+        public void OnTargetHit(Collider2D enemyCollider)
+        {
+            if (!isInitialized || isDead || enemyCollider == null) return;
+
+            if (type == ProjectileType.Explosion)
+            {
+                isDead = true;
+                Explode();
+                Destroy(gameObject);
+            }
+            else
+            {
+                if (hitEnemies.Contains(enemyCollider.gameObject)) return;
+                hitEnemies.Add(enemyCollider.gameObject);
+                ApplyDamage(enemyCollider);
+
+                if (currentPierce >= pierceCount)
+                {
+                    isDead = true;
+                    Destroy(gameObject);
+                }
+                else currentPierce++;
+            }
+        }
+
+        private void ApplyDamage(Collider2D enemy)
+        {
+            var enemyHealth = enemy.GetComponent<Enemy>();
+            if (enemyHealth != null) enemyHealth.TakeDamage(damage);
+        }
+
+        private void Explode()
+        {
+            Collider2D[] results = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+            foreach (var res in results)
+            {
+                if (res.CompareTag("Enemy"))
+                {
+                    var enemyHealth = res.GetComponent<Enemy>();
+                    if (enemyHealth != null) enemyHealth.TakeDamage(damage);
+                }
+            }
         }
     }
 }
