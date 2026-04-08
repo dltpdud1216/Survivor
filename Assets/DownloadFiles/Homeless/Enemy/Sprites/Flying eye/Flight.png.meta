@@ -170,12 +170,12 @@ TextureImporter:
       name: Flight_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 50
+        y: 53
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.48748165, y: 0.22915234}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -192,12 +192,12 @@ TextureImporter:
       name: Flight_1
       rect:
         serializedVersion: 2
-        x: 150
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 197
+        y: 52
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5375538, y: 0.24508476}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -214,12 +214,12 @@ TextureImporter:
       name: Flight_2
       rect:
         serializedVersion: 2
-        x: 300
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 348
+        y: 53
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.6001445, y: 0.24508451}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -236,12 +236,12 @@ TextureImporter:
       name: Flight_3
       rect:
         serializedVersion: 2
-        x: 450
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 499
+        y: 52
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5751081, y: 0.22915259}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -258,12 +258,12 @@ TextureImporter:
       name: Flight_4
       rect:
         serializedVersion: 2
-        x: 600
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 648
+        y: 53
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.6251798, y: 0.30881327}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -280,12 +280,12 @@ TextureImporter:
       name: Flight_5
       rect:
         serializedVersion: 2
-        x: 750
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 802
+        y: 54
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.51251656, y: 0.2769491}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -302,12 +302,12 @@ TextureImporter:
       name: Flight_6
       rect:
         serializedVersion: 2
-        x: 900
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 948
+        y: 53
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5876258, y: 0.27694893}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -324,12 +324,12 @@ TextureImporter:
       name: Flight_7
       rect:
         serializedVersion: 2
-        x: 1050
-        y: 0
-        width: 150
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1100
+        y: 53
+        width: 56
+        height: 44
+      alignment: 9
+      pivot: {x: 0.5375541, y: 0.2928812}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

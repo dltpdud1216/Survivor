@@ -30,8 +30,8 @@ Transform:
   m_GameObject: {fileID: 7028472886583007031}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.44, y: 1.14, z: 0}
-  m_LocalScale: {x: 2.0185, y: 1.9287, z: 1}
+  m_LocalPosition: {x: -0.6332, y: 2.0621, z: 0}
+  m_LocalScale: {x: 3.0943606, y: 3.1580534, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -108,10 +108,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 233b0fc51b3450141adae0701e8e7c77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.Enemy
-  speed: 2
-  health: 20
-  gemPrefab: {fileID: 771194200457863953, guid: 141cdb7a3d750404c90091969fa2a6de,
+  hp: 50
+  speed: 3
+  level: 1
+  itemPrefab: {fileID: 771194200457863953, guid: 141cdb7a3d750404c90091969fa2a6de,
     type: 3}
+  dropRate: 0.5
 --- !u!95 &2883255458309277153
 Animator:
   serializedVersion: 7
@@ -198,8 +200,8 @@ BoxCollider2D:
   m_Offset: {x: -0.00578022, y: -0.05041136}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.5, y: 1.5}
+    pivot: {x: 0.54571813, y: 0.24173054}
+    oldSize: {x: 0.46, y: 0.57}
     newSize: {x: 1.5, y: 1.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

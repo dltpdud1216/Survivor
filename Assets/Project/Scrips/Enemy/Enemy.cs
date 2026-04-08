@@ -1,88 +1,84 @@
-using UnityEngine;
-using System.Collections; // ¡Ú ÄÚ·çÆ¾À» ¾²±â À§ÇØ ÇÊ¼ö!
+ï»¿using UnityEngine;
+using System.Collections;
 
 namespace Survivor
 {
     public class Enemy : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private float speed = 2f;
-        [SerializeField] private float health = 20f;
-        [SerializeField] private GameObject gemPrefab;
+        [Header("Stat Settings")]
+        public float hp = 100f;
+        public float speed = 3f;
+        public int level = 1;
 
-        [Header("Hit Effect")]
-        [SerializeField] private Color hitColor = Color.red; // ¡Ú ºÎµúÇûÀ» ¶§ »ö»ó
-        [SerializeField] private float hitDuration = 0.1f;    // ¡Ú »öÀÌ À¯ÁöµÇ´Â ½Ã°£
+        [Header("Item Drop Settings")]
+        public GameObject itemPrefab;
+        [Range(0, 1)] public float dropRate = 0.5f;
 
-        private Transform playerTransform;
-        private Rigidbody2D rb;
-        private SpriteRenderer spriteRenderer;
-
-        // ¡Ú ÄÚ·çÆ¾ Áßº¹ ½ÇÇà ¹æÁö¿ë
-        private Coroutine hitEffectCoroutine;
-
-        void Awake()
-        {
-            rb = GetComponent<Rigidbody2D>();
-            spriteRenderer = GetComponent<SpriteRenderer>();
-
-            rb.gravityScale = 0f;
-            rb.freezeRotation = true;
-        }
+        private float currentSpeed;
+        private Transform player;
+        private Vector3 originScale;
 
         void Start()
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null) playerTransform = player.transform;
+            currentSpeed = speed;
+            originScale = transform.localScale;
+
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) player = p.transform;
+
+            // ğŸ˜¤ í˜¹ì‹œ ëª¨ë¥´ë‹ˆ ì‹œì‘í•  ë•Œ ì†ë„ê°€ 0ì´ê±°ë‚˜ ìŒìˆ˜ì¸ì§€ ì²´í¬
+            if (currentSpeed <= 0) currentSpeed = 3f;
         }
 
-        void FixedUpdate()
+        void Update()
         {
-            if (playerTransform == null) return;
+            if (player == null) return;
 
-            Vector2 direction = (playerTransform.position - transform.position).normalized;
-            rb.linearVelocity = direction * speed;
+            // 1. í”Œë ˆì´ì–´ ë°©í–¥ ê³„ì‚° (íšŒí”¼ ë°©ì§€ ë¡œì§) ğŸ˜¤
+            // ë‹¨ìˆœíˆ (ëª©ì ì§€ - ë‚´ìœ„ì¹˜)ë¥¼ í•´ì„œ ê±°ë¦¬ì™€ ìƒê´€ì—†ì´ ë°©í–¥ë§Œ ì¶”ì¶œí•©ë‹ˆë‹¤.
+            Vector3 direction = player.position - transform.position;
+            direction.z = 0; // 2Dë‹ˆê¹Œ Zì¶•ì€ ì£½ì—¬ë²„ë¦½ë‹ˆë‹¤.
 
-            if (direction.x != 0)
+            Vector3 moveDir = direction.normalized;
+
+            // 2. ì´ë™ ì‹¤í–‰ (ì†ë„ì— ë ˆë²¨ì´ ê³±í•´ì§€ê±°ë‚˜ ë‚˜ëˆ ì§€ì§€ ì•Šê²Œ ê³ ì •)
+            transform.position += moveDir * currentSpeed * Time.deltaTime;
+
+            // 3. ë°©í–¥ì— ë”°ë¥¸ ì¢Œìš° ë°˜ì „
+            if (moveDir.x != 0)
             {
-                spriteRenderer.flipX = (direction.x < 0);
+                float flipX = moveDir.x > 0 ? -Mathf.Abs(originScale.x) : Mathf.Abs(originScale.x);
+                transform.localScale = new Vector3(flipX, originScale.y, originScale.z);
             }
         }
 
-        // µ¥¹ÌÁö¸¦ ÀÔ¾úÀ» ¶§ È£Ãâ
-        public void TakeDamage(float damage)
+        public void TakeDamage(float dmg)
         {
-            health -= damage;
-
-            // ¡Ú µ¥¹ÌÁö ÀÔÀ» ¶§ ±ôºıÀÌ´Â ÀÌÆåÆ® ½ÇÇà
-            if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine); // ÀÌ¹Ì ±ôºıÀÌ´Â ÁßÀÌ¸é ¸ØÃß°í »õ·Î ½ÃÀÛ
-            hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
-
-            if (health <= 0) Die();
-        }
-
-        // ¡Ú »¡°²°Ô ±ôºıÀÌ´Â ¸¶¹ıÀÇ ÄÚ·çÆ¾
-        private IEnumerator HitEffectRoutine()
-        {
-            // 1. ½ºÇÁ¶óÀÌÆ® »ö»óÀ» »¡°£»öÀ¸·Î º¯°æ
-            spriteRenderer.color = hitColor;
-
-            // 2. hitDuration(0.1ÃÊ) µ¿¾È ´ë±â
-            yield return new WaitForSeconds(hitDuration);
-
-            // 3. ´Ù½Ã ÇÏ¾á»ö(¿ø·¡ »ö)À¸·Î µ¹·Á³õ±â
-            spriteRenderer.color = Color.white;
-            hitEffectCoroutine = null;
+            hp -= dmg;
+            if (hp <= 0) Die();
         }
 
         private void Die()
         {
-            if (Random.value < 0.7f && gemPrefab != null)
+            if (itemPrefab != null && Random.value <= dropRate)
             {
-                Instantiate(gemPrefab, transform.position, Quaternion.identity);
+                Instantiate(itemPrefab, transform.position, Quaternion.identity);
             }
-
             Destroy(gameObject);
+        }
+
+        public void ApplySlow(float amount, float duration)
+        {
+            StopAllCoroutines();
+            StartCoroutine(SlowRoutine(amount, duration));
+        }
+
+        private IEnumerator SlowRoutine(float amount, float duration)
+        {
+            // ğŸ˜¤ ìŠ¬ë¡œìš° ì‹œì—ë„ speed ê¸°ë³¸ê°’ì„ ì°¸ì¡°í•˜ê²Œ í•´ì„œ ê³„ì‚° ê¼¬ì„ ë°©ì§€
+            currentSpeed = speed * (1f - amount);
+            yield return new WaitForSeconds(duration);
+            currentSpeed = speed;
         }
     }
 }

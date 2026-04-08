@@ -22,14 +22,24 @@ namespace Survivor
         private List<SkillData> currentOptions = new List<SkillData>();
         private bool isFirstSelect = true;
 
+        // 😤 사진에 있는 스크립트 이름(Skill 포함)과 정확히 매칭되도록 수정했습니다.
         private Dictionary<string, string> skillNameMap = new Dictionary<string, string>() {
-            { "독 안개", "mlasma" }, { "화염구", "fireball" }, { "얼음 화살", "frostbolt" },
-            { "벼락", "voltcrash" }, { "회전하는 칼날", "spinningblade" },
-            { "신성한 심판", "divinejudgement" }, { "영원한 지옥불", "eternalinferno" },
-            { "빙하의 별", "glacialstar" }, { "궤도 톱날", "orbitingsaw" }, { "죽음의 발걸음", "toxictrail" },
-            { "거인의 장갑", "giantgauntlets" }, { "헤르메스의 신발", "hermesshoes" },
-            { "행운의 부적", "luckycharm" }, { "마법 시계", "magichourglass" },
-            { "자석", "magnet" }, { "힘의 원석", "powercrystal" }
+            { "독 안개", "MlasmaSkill" },
+            { "화염구", "FireballSkill" },
+            { "얼음 화살", "FrostBoltSkill" },
+            { "벼락", "VoltCrashSkill" },
+            { "회전하는 칼날", "SpinningBladeSkill" },
+            { "신성한 심판", "DivineJudgementSkill" },
+            { "영원한 지옥불", "EternalInfernoSkill" },
+            { "빙하의 별", "GlacialStarSkill" },
+            { "궤도 톱날", "OrbitingSawSkill" },
+            { "죽음의 발걸음", "ToxicTrailSkill" },
+            { "거인의 장갑", "GiantGauntletsSkill" },
+            { "헤르메스의 신발", "HermesShoesSkill" },
+            { "행운의 부적", "LuckyCharmSkill" },
+            { "마법 시계", "MagicHourglassSkill" },
+            { "자석", "MagnetSkill" },
+            { "힘의 원석", "PowerCrystalSkill" }
         };
 
         void Start()
@@ -59,7 +69,9 @@ namespace Survivor
 
             if (playerObject != null)
             {
+                // 자식 오브젝트에 꺼져있는 스크립트까지 전부 리스트업
                 playerActiveSkills = playerObject.GetComponentsInChildren<MonoBehaviour>(true).ToList();
+                Debug.Log($"✅ 플레이어 스캔 완료: {playerActiveSkills.Count}개 감지");
             }
         }
 
@@ -68,68 +80,64 @@ namespace Survivor
             if (skillPanel != null) skillPanel.SetActive(true);
             Time.timeScale = 0f;
 
-            // 1. 기본 필터링 (널 체크 및 만렙 제외)
             var filteredPool = allSkillDatabase.Where(s => s != null && s.level < 8).ToList();
 
-            // 2. 첫 선택 시 액티브 스킬 강제 필터링 (얼음 화살 타입 확인 필수! 😤)
             if (isFirstSelect)
             {
                 var activeOnly = filteredPool.Where(s => s.type == SkillType.Active).ToList();
-
-                // 만약 액티브 필터링 후 개수가 너무 적으면 전체 풀 사용 (안전장치)
                 if (activeOnly.Count >= skillChoiceButtons.Count)
                 {
                     filteredPool = activeOnly;
                 }
             }
 
-            // 3. 랜덤 셔플 및 추출
             currentOptions = filteredPool.OrderBy(x => Random.value).Take(skillChoiceButtons.Count).ToList();
-
-            // 4. 로그로 결과 확인 (얼음 화살이 포함되었는지 콘솔에서 바로 확인 가능)
-            foreach (var opt in currentOptions) Debug.Log($"🎲 선택지에 등장: {opt.skillName}");
-
             UpdateUI();
         }
 
         public void OnSkillSelected(int index)
         {
-            try
+            if (index >= 0 && index < currentOptions.Count)
             {
-                if (index >= 0 && index < currentOptions.Count)
-                {
-                    SkillData selected = currentOptions[index];
+                SkillData selected = currentOptions[index];
+                selected.level++;
 
-                    selected.level++;
-                    ActivateSkillScript(selected.skillName);
-                }
+                Debug.Log($"👍 선택됨: {selected.skillName}");
+                ActivateSkillScript(selected.skillName);
             }
-            catch (System.Exception e)
-            {
-            }
-            finally
-            {
-                if (isFirstSelect) isFirstSelect = false;
-                ResumeGame();
-            }
+
+            if (isFirstSelect) isFirstSelect = false;
+            ResumeGame();
         }
 
         private void ActivateSkillScript(string displayName)
         {
             string searchKey = displayName.Trim();
-            string englishKeyword = skillNameMap.ContainsKey(searchKey) ? skillNameMap[searchKey] : searchKey.Replace(" ", "").ToLower();
 
+            // 😤 딕셔너리에서 클래스 이름 가져오기
+            if (!skillNameMap.TryGetValue(searchKey, out string targetClassName))
+            {
+                targetClassName = searchKey.Replace(" ", ""); // 맵에 없으면 공백만 제거
+            }
+
+            bool found = false;
             foreach (var script in playerActiveSkills)
             {
                 if (script == null) continue;
-                string className = script.GetType().Name.ToLower();
 
-                if (className.Contains(englishKeyword.ToLower()))
+                // 😤 클래스 이름을 대소문자 무시하고 비교
+                string currentClassName = script.GetType().Name;
+
+                if (string.Equals(currentClassName, targetClassName, System.StringComparison.OrdinalIgnoreCase))
                 {
                     script.enabled = true;
-                    return;
+                    Debug.Log($"✨ 스크립트 활성화 성공: {currentClassName}");
+                    found = true;
+                    break;
                 }
             }
+
+            if (!found) Debug.LogError($"❌ 매칭 실패: '{targetClassName}' 클래스를 찾을 수 없습니다. (선택 이름: {searchKey})");
         }
 
         private void ResumeGame()
@@ -140,10 +148,8 @@ namespace Survivor
 
         private void UpdateUI()
         {
-            // 모든 버튼 일단 비활성화
             foreach (var btn in skillChoiceButtons) btn.gameObject.SetActive(false);
 
-            // 옵션 개수만큼 버튼 활성화 및 데이터 매핑
             for (int i = 0; i < currentOptions.Count; i++)
             {
                 if (i >= skillChoiceButtons.Count) break;
@@ -153,7 +159,8 @@ namespace Survivor
                 var txt = skillChoiceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
                 if (txt != null) txt.text = currentOptions[i].skillName;
 
-                var icon = skillChoiceButtons[i].GetComponentsInChildren<Image>(true).FirstOrDefault(x => x.gameObject.name == "Icon");
+                var images = skillChoiceButtons[i].GetComponentsInChildren<Image>(true);
+                var icon = images.FirstOrDefault(x => x.gameObject.name == "Icon");
                 if (icon != null) icon.sprite = currentOptions[i].skillIcon;
             }
         }

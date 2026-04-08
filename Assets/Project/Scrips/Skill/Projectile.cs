@@ -3,129 +3,94 @@ using System.Collections.Generic;
 
 namespace Survivor
 {
-    // [Enum 선언] 클래스 바깥에 두어 외부 참조 에러 방지 😤
-    public enum ProjectileType { Explosion, Penetration }
-
     public class Projectile : MonoBehaviour
     {
-        [Header("Settings")]
+        public enum ProjectileType { Guided, Straight, Explosion }
         public ProjectileType type;
-        public int pierceCount = 0;
-        public float explosionRadius = 2.0f;
-        public Vector3 forcedScale = new Vector3(0.5f, 0.5f, 0.5f);
 
-        [Header("Direction Fix")]
-        public float rotationOffset = 90f;
+        [Header("Settings")]
+        public float damage = 20f;
+        public float explosionRadius = 3.0f; // 판정 범위를 조금 더 넓혔습니다 😤
+        public float slowAmount = 0.5f;
 
-        private float speed;
-        private float damage;
         private Vector3 direction;
-        private Transform target;
-        private int currentPierce = 0;
-        private bool isDead = false;
+        private float speed;
         private bool isInitialized = false;
-        private HashSet<GameObject> hitEnemies = new HashSet<GameObject>();
+        private HashSet<int> hitEnemyIDs = new HashSet<int>();
 
-        // 렌더러와 콜라이더 참조
-        private SpriteRenderer spriteRenderer;
-        private Collider2D bodyCollider;
-
-        void Awake()
+        public void Setup(Vector3 dir, float dmg, float projSpeed, float extra, Transform target = null)
         {
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-            bodyCollider = GetComponent<Collider2D>();
-
-            // 😤 [중요] 생성되자마자 일단 숨기고 충돌도 막습니다. (잔상 방지)
-            if (spriteRenderer != null) spriteRenderer.enabled = false;
-            if (bodyCollider != null) bodyCollider.enabled = false;
-        }
-
-        public void Setup(Vector3 dir, float dmg, float projSpeed, float extra, Transform targetEnemy = null)
-        {
-            // 데이터 할당
             this.direction = dir.normalized;
             this.damage = dmg;
             this.speed = projSpeed;
-            this.target = targetEnemy;
-
-            // 물리/위치 초기화
-            transform.SetParent(null);
-            transform.localScale = forcedScale;
-
-            // 😤 [핵심] Setup이 호출된 이 순간에만 모습과 충돌을 켭니다.
-            if (spriteRenderer != null) spriteRenderer.enabled = true;
-            if (bodyCollider != null) bodyCollider.enabled = true;
-
-            RotateTowardsDirection();
             isInitialized = true;
-            Destroy(gameObject, 3f);
+
+            // 벼락(Explosion)은 제자리 유지, 투사체는 발사
+            if (type == ProjectileType.Explosion)
+                Destroy(gameObject, 1.5f);
+            else
+                Destroy(gameObject, 5f);
         }
 
         private void Update()
         {
-            // 셋업 전이거나 죽었다면 이동 금지 😤
-            if (!isInitialized || isDead) return;
-
-            if (target != null && target.gameObject.activeInHierarchy)
-            {
-                direction = (target.position - transform.position).normalized;
-            }
-
-            RotateTowardsDirection();
+            if (!isInitialized || type == ProjectileType.Explosion) return;
             transform.position += direction * speed * Time.deltaTime;
         }
 
-        private void RotateTowardsDirection()
-        {
-            if (direction != Vector3.zero)
-            {
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0, 0, angle + rotationOffset);
-            }
-        }
-
+        // 😤 화염구 등 투사체 충돌 시 호출 (ProjectileCollision.cs에서 부름)
         public void OnTargetHit(Collider2D enemyCollider)
         {
-            if (!isInitialized || isDead || enemyCollider == null) return;
+            if (!isInitialized || enemyCollider == null) return;
+            if (!enemyCollider.CompareTag("Enemy")) return;
 
-            if (type == ProjectileType.Explosion)
+            Enemy enemy = enemyCollider.GetComponent<Enemy>();
+            if (enemy != null)
             {
-                isDead = true;
-                Explode();
+                enemy.TakeDamage(damage);
+                Debug.Log($"🔥 투사체 적중! 데미지: {damage}");
+
+                // 관통 기능이 없다면 여기서 파괴
                 Destroy(gameObject);
-            }
-            else
-            {
-                if (hitEnemies.Contains(enemyCollider.gameObject)) return;
-                hitEnemies.Add(enemyCollider.gameObject);
-                ApplyDamage(enemyCollider);
-
-                if (currentPierce >= pierceCount)
-                {
-                    isDead = true;
-                    Destroy(gameObject);
-                }
-                else currentPierce++;
             }
         }
 
-        private void ApplyDamage(Collider2D enemy)
+        // ⚡ [애니메이션 이벤트: 20프레임] 벼락 타격
+        public void ThunderHit()
         {
-            var enemyHealth = enemy.GetComponent<Enemy>();
-            if (enemyHealth != null) enemyHealth.TakeDamage(damage);
+            hitEnemyIDs.Clear();
+            Explode();
+        }
+
+        public void ThunderSlow()
+        {
+            Explode(); // 😤 데미지가 확실히 들어가게 슬로우 시점에도 체크
         }
 
         private void Explode()
         {
+            // 😤 'Enemy' 태그를 가진 모든 콜라이더를 긁어옵니다.
             Collider2D[] results = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+
             foreach (var res in results)
             {
                 if (res.CompareTag("Enemy"))
                 {
-                    var enemyHealth = res.GetComponent<Enemy>();
-                    if (enemyHealth != null) enemyHealth.TakeDamage(damage);
+                    Enemy enemy = res.GetComponent<Enemy>();
+                    if (enemy != null)
+                    {
+                        enemy.TakeDamage(damage);
+                        Debug.Log($"⚡ 벼락 폭발 적중: {enemy.name}, 데미지: {damage}");
+                    }
                 }
             }
+        }
+
+        // 😤 에디터 Scene 뷰에서 폭발 범위를 노란 원으로 보여줍니다.
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
     }
 }

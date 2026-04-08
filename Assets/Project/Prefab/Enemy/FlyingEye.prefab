@@ -133,8 +133,8 @@ BoxCollider2D:
   m_Offset: {x: 0.020296931, y: -0.009587802}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.5, y: 1.5}
+    pivot: {x: 0.48748165, y: 0.22915234}
+    oldSize: {x: 0.56, y: 0.44}
     newSize: {x: 1.5, y: 1.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -181,10 +181,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 233b0fc51b3450141adae0701e8e7c77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.Enemy
-  speed: 5
-  health: 30
-  gemPrefab: {fileID: 771194200457863953, guid: 141cdb7a3d750404c90091969fa2a6de,
+  hp: 80
+  speed: 7
+  level: 5
+  itemPrefab: {fileID: 771194200457863953, guid: 141cdb7a3d750404c90091969fa2a6de,
     type: 3}
+  dropRate: 0.5
 --- !u!95 &5783831119544015066
 Animator:
   serializedVersion: 7

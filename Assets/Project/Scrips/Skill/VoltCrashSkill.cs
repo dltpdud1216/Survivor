@@ -1,38 +1,50 @@
-using UnityEngine;
-using System.Collections;
+癤퓎sing UnityEngine;
+using System.Collections.Generic;
 
 namespace Survivor
 {
     public class VoltCrashSkill : MonoBehaviour
     {
-        public GameObject boltPrefab; // 라인 렌더러가 붙은 프리팹
-        public float damage = 20f;
-        public float coolDown = 2f;
+        public GameObject lightningPrefab;
+        public float shootInterval = 1.2f;
+        public float damage = 30f;
+        public float scanRadius = 8f;
+
         private float timer;
 
         void Update()
         {
             timer += Time.deltaTime;
-            if (timer >= coolDown)
+            if (timer >= shootInterval)
             {
-                Strike();
-                timer = 0;
+                Shoot();
+                timer = 0f;
             }
         }
 
-        void Strike()
+        void Shoot()
         {
-            // 1. 랜덤한 적 찾기
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            if (enemies.Length == 0) return;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, scanRadius);
+            List<Transform> targets = new List<Transform>();
 
-            GameObject target = enemies[Random.Range(0, enemies.Length)];
+            foreach (var col in colliders)
+            {
+                if (col.CompareTag("Enemy")) targets.Add(col.transform);
+            }
 
-            // 2. 벼락 프리팹 생성
-            GameObject bolt = Instantiate(boltPrefab);
+            if (targets.Count == 0) return;
 
-            // 3. 벼락 스크립트에 정보 전달 (적 위치, 데미지)
-            bolt.GetComponent<LightningBolt>().Setup(target.transform.position, damage);
+            Transform randomTarget = targets[Random.Range(0, targets.Count)];
+            Vector3 spawnPos = randomTarget.position;
+            spawnPos.y += 0.5f;
+
+            GameObject go = Instantiate(lightningPrefab, spawnPos, Quaternion.identity);
+            Projectile proj = go.GetComponent<Projectile>();
+            if (proj != null)
+            {
+                proj.type = Projectile.ProjectileType.Explosion;
+                proj.Setup(Vector3.zero, damage, 0f, 0f);
+            }
         }
     }
 }
