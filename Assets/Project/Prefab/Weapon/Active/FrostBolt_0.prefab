@@ -131,9 +131,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   type: 1
   damage: 10
+  speed: 7
   explosionRadius: 0
   slowAmount: 0
   pierceCount: 1
+  rotationOffset: 0
 --- !u!1 &3269046657850275011
 GameObject:
   m_ObjectHideFlags: 0

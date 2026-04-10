@@ -4,6 +4,9 @@ namespace Survivor
 {
     public class FireballSkill : MonoBehaviour
     {
+        // 😤 강화 로직을 위해 SkillData 추가
+        public SkillData skillData;
+
         [Header("Settings")]
         public GameObject fireballPrefab;
         public float shootInterval = 2f;
@@ -15,7 +18,6 @@ namespace Survivor
         private void OnEnable()
         {
             Debug.Log("화염구 스킬 활성화!");
-            // 😤 [수정] 시작하자마자 쏘지 않도록 0으로 초기화
             timer = 0f;
         }
 
@@ -34,12 +36,10 @@ namespace Survivor
         {
             GameObject targetObj = FindNearestEnemy();
 
-            // 😤 타겟이 없으면 플레이어 정면, 있으면 적 방향
             Vector3 shootDir = targetObj != null ?
                 (targetObj.transform.position - transform.position).normalized :
-                transform.right; // 2D면 보통 right가 정면
+                transform.right;
 
-            // 생성 시 회전값 계산
             float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg;
             Quaternion spawnRotation = Quaternion.Euler(0, 0, angle);
 
@@ -49,8 +49,14 @@ namespace Survivor
             Projectile proj = go.GetComponent<Projectile>();
             if (proj != null)
             {
-                // 타겟 정보를 넘겨줘야 Projectile이 날아갑니다 😤
-                proj.Setup(shootDir, damage, projectileSpeed, 0f, targetObj != null ? targetObj.transform : null);
+                // 😤 [폭발형 지정]
+                proj.type = Projectile.ProjectileType.Explosion;
+
+                // 😤 [강화 로직] 1.5배 복리 배율 계산
+                float multiplier = Mathf.Pow(1.5f, skillData.level);
+
+                // Setup의 4번째 인자로 multiplier 전달
+                proj.Setup(shootDir, damage, projectileSpeed, multiplier, targetObj != null ? targetObj.transform : null);
             }
         }
 

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 459418734690901844}
   m_Layer: 0
   m_Name: FireBall_0
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -107,11 +107,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffcf5b3c19ff3894a82f554584f0374a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  type: 0
+  type: 2
   damage: 10
+  speed: 7
   explosionRadius: 2
   slowAmount: 0
   pierceCount: 0
+  rotationOffset: 90
 --- !u!95 &459418734690901844
 Animator:
   serializedVersion: 7

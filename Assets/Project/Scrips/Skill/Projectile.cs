@@ -10,68 +10,100 @@ namespace Survivor
 
         [Header("Settings")]
         public float damage = 20f;
-        public float explosionRadius = 3.0f; // 판정 범위를 조금 더 넓혔습니다 😤
-        public float slowAmount = 0.5f;
+        public float speed = 7f;
+        public float explosionRadius = 3.0f;
+        public float slowAmount = 0.5f; // 😤 슬로우 위력
+        public int pierceCount = 0;
+
+        [Header("Rotation Settings")]
+        public float rotationOffset = 0f;
 
         private Vector3 direction;
-        private float speed;
         private bool isInitialized = false;
+        private int currentPierce = 0;
         private HashSet<int> hitEnemyIDs = new HashSet<int>();
 
-        public void Setup(Vector3 dir, float dmg, float projSpeed, float extra, Transform target = null)
+        private Vector3 initialScale;
+        private float initialExplosionRadius;
+
+        private void Awake()
+        {
+            initialScale = transform.localScale;
+            initialExplosionRadius = explosionRadius;
+        }
+
+        public void Setup(Vector3 dir, float dmg, float projSpeed, float multiplier, Transform target = null)
         {
             this.direction = dir.normalized;
-            this.damage = dmg;
+            float finalMultiplier = (multiplier < 1f) ? 1f : multiplier;
+
+            this.damage = dmg * finalMultiplier;
+            this.explosionRadius = initialExplosionRadius * finalMultiplier;
             this.speed = projSpeed;
+            transform.localScale = initialScale * finalMultiplier;
+
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle + rotationOffset);
+
             isInitialized = true;
 
-            // 벼락(Explosion)은 제자리 유지, 투사체는 발사
-            if (type == ProjectileType.Explosion)
-                Destroy(gameObject, 1.5f);
-            else
-                Destroy(gameObject, 5f);
+            if (speed <= 0) Destroy(gameObject, 1.2f); // 😤 연출을 위해 조금 더 길게 유지
+            else Destroy(gameObject, 5f);
         }
 
         private void Update()
         {
-            if (!isInitialized || type == ProjectileType.Explosion) return;
+            if (!isInitialized || (type == ProjectileType.Explosion && speed <= 0)) return;
             transform.position += direction * speed * Time.deltaTime;
         }
 
-        // 😤 화염구 등 투사체 충돌 시 호출 (ProjectileCollision.cs에서 부름)
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (!isInitialized || !collision.CompareTag("Enemy")) return;
+            OnTargetHit(collision);
+        }
+
         public void OnTargetHit(Collider2D enemyCollider)
         {
-            if (!isInitialized || enemyCollider == null) return;
-            if (!enemyCollider.CompareTag("Enemy")) return;
+            int id = enemyCollider.gameObject.GetInstanceID();
+            if (hitEnemyIDs.Contains(id)) return;
 
             Enemy enemy = enemyCollider.GetComponent<Enemy>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(damage);
-                Debug.Log($"🔥 투사체 적중! 데미지: {damage}");
+            if (enemy == null) return;
 
-                // 관통 기능이 없다면 여기서 파괴
+            enemy.TakeDamage(damage);
+            hitEnemyIDs.Add(id);
+
+            if (type == ProjectileType.Explosion)
+            {
+                Explode(false);
                 Destroy(gameObject);
+            }
+            else
+            {
+                if (currentPierce < pierceCount) currentPierce++;
+                else Destroy(gameObject);
             }
         }
 
-        // ⚡ [애니메이션 이벤트: 20프레임] 벼락 타격
+        // 😤 [복구] 애니메이션 이벤트가 찾는 'ThunderHit'
         public void ThunderHit()
         {
+            if (!isInitialized) return;
             hitEnemyIDs.Clear();
-            Explode();
+            Explode(false);
         }
 
+        // 😤 [복구/에러 해결] 애니메이션 이벤트가 찾는 'ThunderSlow'
         public void ThunderSlow()
         {
-            Explode(); // 😤 데미지가 확실히 들어가게 슬로우 시점에도 체크
+            if (!isInitialized) return;
+            Explode(true); // 슬로우 효과를 켜서 폭발 실행
         }
 
-        private void Explode()
+        private void Explode(bool applySlow)
         {
-            // 😤 'Enemy' 태그를 가진 모든 콜라이더를 긁어옵니다.
             Collider2D[] results = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
-
             foreach (var res in results)
             {
                 if (res.CompareTag("Enemy"))
@@ -80,17 +112,11 @@ namespace Survivor
                     if (enemy != null)
                     {
                         enemy.TakeDamage(damage);
-                        Debug.Log($"⚡ 벼락 폭발 적중: {enemy.name}, 데미지: {damage}");
+                        // 😤 슬로우 적용
+                        if (applySlow) enemy.ApplySlow(slowAmount, 1.5f);
                     }
                 }
             }
-        }
-
-        // 😤 에디터 Scene 뷰에서 폭발 범위를 노란 원으로 보여줍니다.
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
     }
 }

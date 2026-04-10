@@ -131,9 +131,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.Projectile
   type: 2
   damage: 5
+  speed: 7
   explosionRadius: 2
   slowAmount: 0.5
   pierceCount: 1
+  rotationOffset: 0
 --- !u!61 &8304357431440607997
 BoxCollider2D:
   m_ObjectHideFlags: 0
