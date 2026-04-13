@@ -7,17 +7,14 @@ namespace Survivor
     {
         public SkillData skillData;
 
-        [Header("Prefab")]
+        [Header("Prefabs")]
         [SerializeField] private GameObject bladePrefab;
+        [SerializeField] private GameObject evolvedBladePrefab;
 
-        [Header("Damage Settings")]
+        [Header("Base Settings (Level 1)")]
         [SerializeField] private float baseDamage = 15f;
-
-        [Header("Movement & Size Control")]
-        [SerializeField] private float rotationSpeed = 200f;
+        [SerializeField] private float baseRotationSpeed = 200f; // 기본 회전 속도
         [SerializeField] private float baseRadius = 2f;
-
-        // 😤 이 값이 0.2라면, 첫 획득 시 정확히 0.2 크기로 나옵니다.
         [SerializeField] private float baseScaleValue = 0.2f;
 
         private List<GameObject> activeBlades = new List<GameObject>();
@@ -26,7 +23,8 @@ namespace Survivor
 
         void Update()
         {
-            if (skillData != null && lastProcessedLevel != skillData.level)
+            if (skillData == null) return;
+            if (lastProcessedLevel != skillData.level)
             {
                 lastProcessedLevel = skillData.level;
                 UpdateBladeStatus();
@@ -37,58 +35,67 @@ namespace Survivor
         {
             if (activeBlades.Count == 0) return;
 
-            currentAngle += rotationSpeed * Time.deltaTime;
+            // 😤 진화 시 회전 속도 1.5배 보너스
+            float currentRotationSpeed = baseRotationSpeed;
+            if (skillData.type == SkillType.Evolution) currentRotationSpeed *= 1.5f;
 
-            // 😤 레벨 1(첫 획득)일 때 multiplier는 1이 되어야 함
-            // 만약 UI 매니저에서 선택 시 레벨이 1이 된다면 (level - 1)로 계산
-            float multiplier = Mathf.Pow(1.5f, skillData.level - 1);
-            if (multiplier < 1f) multiplier = 1f;
+            currentAngle += currentRotationSpeed * Time.deltaTime;
+
+            float multiplier = Mathf.Pow(1.5f, Mathf.Max(0, skillData.level - 1));
+
+            // 진화 시 크기 보너스
+            if (skillData.type == SkillType.Evolution) multiplier *= 1.5f;
 
             float currentRadius = baseRadius * multiplier;
-
-            // 😤 [크기 고정] 인스펙터의 baseScaleValue에 배율을 곱함
             float currentScale = baseScaleValue * multiplier;
-
             float angleStep = 360f / activeBlades.Count;
 
             for (int i = 0; i < activeBlades.Count; i++)
             {
                 if (activeBlades[i] == null) continue;
                 float finalAngle = (currentAngle + (i * angleStep)) * Mathf.Deg2Rad;
-
                 Vector3 offset = new Vector3(Mathf.Cos(finalAngle), Mathf.Sin(finalAngle), 0) * currentRadius;
                 activeBlades[i].transform.position = transform.position + offset;
-
-                // 😤 매 프레임 여기서 크기를 강제로 박아버립니다.
                 activeBlades[i].transform.localScale = new Vector3(currentScale, currentScale, 1f);
-
                 activeBlades[i].transform.right = (activeBlades[i].transform.position - transform.position).normalized;
             }
         }
+
+        public void ForceEvolveBlade() { UpdateBladeStatus(); }
 
         private void UpdateBladeStatus()
         {
             foreach (var b in activeBlades) if (b != null) Destroy(b);
             activeBlades.Clear();
 
-            // 첫 획득(레벨 1) 시 2개
-            int count = skillData.level + 1;
-            if (count < 2) count = 2;
+            if (skillData == null) return;
 
-            // 첫 획득(레벨 1) 시 기본 데미지
-            float finalDamage = baseDamage * Mathf.Pow(1.5f, skillData.level - 1);
+            // 1. 프리팹 결정
+            GameObject targetPrefab = (skillData.type == SkillType.Evolution && evolvedBladePrefab != null) ? evolvedBladePrefab : bladePrefab;
 
+            // 2. 😤 칼날 개수 결정
+            // 일반: 1렙(2개), 2렙(3개), 3렙(4개), 4렙(5개)
+            // 진화: 무조건 4개부터 시작 (레벨업 마다 추가 가능)
+            int count = (skillData.type == SkillType.Evolution)
+                        ? 4 + (skillData.level - 1)
+                        : Mathf.Max(2, skillData.level + 1);
+
+            // 3. 😤 데미지 결정 (진화 시 기본 2.5배 뻥튀기)
+            float evolutionDamageMult = (skillData.type == SkillType.Evolution) ? 2.5f : 1.0f;
+            float finalDamage = baseDamage * Mathf.Pow(1.5f, Mathf.Max(0, skillData.level - 1)) * evolutionDamageMult;
+
+            // 4. 생성 및 데미지 전달
             for (int i = 0; i < count; i++)
             {
-                GameObject newBlade = Instantiate(bladePrefab);
-                // 😤 칼날은 Projectile 스크립트의 크기 제어를 무시해야 하므로 
-                // 만약 Blade 스크립트만 있다면 아래처럼 데미지만 넣어줍니다.
+                GameObject newBlade = Instantiate(targetPrefab);
                 if (newBlade.TryGetComponent<Blade>(out Blade b))
                 {
                     b.currentDamage = finalDamage;
                 }
                 activeBlades.Add(newBlade);
             }
+
+            Debug.Log($"⚔️ {targetPrefab.name} 생성! 개수: {count}, 데미지: {finalDamage}, 속도 보너스 적용됨");
         }
     }
 }

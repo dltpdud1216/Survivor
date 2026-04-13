@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2089667224288697830}
   m_Layer: 0
   m_Name: EXPGemS
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -105,3 +105,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Survivor.CollectibleItem
   expAmount: 5
+  flySpeed: 10

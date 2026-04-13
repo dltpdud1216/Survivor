@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8807428660183674860}
   - component: {fileID: 2883255458309277153}
   - component: {fileID: 7356700627297828861}
-  - component: {fileID: 739810416462302662}
+  - component: {fileID: 443052391562665665}
   m_Layer: 6
   m_Name: Mushromm
   m_TagString: Enemy
@@ -113,7 +113,9 @@ MonoBehaviour:
   level: 1
   itemPrefab: {fileID: 771194200457863953, guid: 141cdb7a3d750404c90091969fa2a6de,
     type: 3}
-  dropRate: 0.5
+  dropRate: 1
+  hitColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.1
 --- !u!95 &2883255458309277153
 Animator:
   serializedVersion: 7
@@ -163,8 +165,8 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!61 &739810416462302662
-BoxCollider2D:
+--- !u!58 &443052391562665665
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -197,15 +199,5 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.00578022, y: -0.05041136}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.54571813, y: 0.24173054}
-    oldSize: {x: 0.46, y: 0.57}
-    newSize: {x: 1.5, y: 1.5}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 0.2630276, y: 0.39094862}
-  m_EdgeRadius: 0
+  m_Offset: {x: 0.006285284, y: 0.14721358}
+  m_Radius: 0.15117659

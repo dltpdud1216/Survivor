@@ -5,18 +5,28 @@ namespace Survivor
     public class MagnetSkill : MonoBehaviour
     {
         private PlayerStats stats;
-        public float baseIncrease = 1.5f;
+        private CircleCollider2D magnetCollider;
 
-        void Awake() { stats = GetComponentInParent<PlayerStats>(); }
+        void Awake()
+        {
+            stats = GetComponentInParent<PlayerStats>();
+            magnetCollider = GetComponent<CircleCollider2D>();
 
+            if (magnetCollider != null)
+            {
+                magnetCollider.isTrigger = true;
+                if (stats != null) magnetCollider.radius = stats.magnetRange;
+            }
+        }
+
+        // 😤 [수정] PlayerStats에서 호출 시 실제 유니티 콜라이더 반지름을 확장
         public void ApplyMagnetEffect()
         {
-            if (stats == null) stats = GetComponentInParent<PlayerStats>();
-            if (stats != null)
+            if (stats != null && magnetCollider != null)
             {
-                // 😤 현재 범위를 기준으로 1.5배 곱해버립니다 (복리 적용)
-                stats.magnetRange *= 1.5f;
-                Debug.Log($"🧲 자석 범위 1.5배 강화! 현재 범위: {stats.magnetRange}");
+                // 수치 동기화
+                magnetCollider.radius = stats.magnetRange;
+                Debug.Log($"[자석 범위 확장] 물리 Radius가 {magnetCollider.radius}로 업데이트되었습니다.");
             }
         }
     }
