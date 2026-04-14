@@ -136,6 +136,8 @@ MonoBehaviour:
   slowAmount: 0
   pierceCount: 1
   rotationOffset: 0
+  evolutionPrefab: {fileID: 0}
+  isEvolvedProjectile: 0
 --- !u!1 &3269046657850275011
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +168,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.182, y: -0.132, z: 0}
-  m_LocalScale: {x: 0.3557, y: 1.3157, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8992328880675659014}

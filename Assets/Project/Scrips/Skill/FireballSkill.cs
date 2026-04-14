@@ -4,59 +4,51 @@ namespace Survivor
 {
     public class FireballSkill : MonoBehaviour
     {
-        // 😤 강화 로직을 위해 SkillData 추가
+        public static FireballSkill Instance;
         public SkillData skillData;
 
-        [Header("Settings")]
         public GameObject fireballPrefab;
+        public GameObject evolvedPrefab;
+
         public float shootInterval = 2f;
-        public float damage = 10f;
+        public float damage = 15f;
         public float projectileSpeed = 10f;
 
         private float timer;
+        private PlayerStats stats;
+        public bool isEvolved = false;
 
-        private void OnEnable()
-        {
-            Debug.Log("화염구 스킬 활성화!");
-            timer = 0f;
-        }
+        private void Awake() { Instance = this; }
+        void Start() { stats = GetComponentInParent<PlayerStats>(); }
 
         private void Update()
         {
-            timer += Time.deltaTime;
+            if (Time.timeScale == 0) return;
+            if (!isEvolved && skillData != null && skillData.level >= 5) isEvolved = true;
 
-            if (timer >= shootInterval)
-            {
-                Shoot();
-                timer = 0f;
-            }
+            float cooldown = (stats != null) ? shootInterval * stats.cooldownMultiplier : shootInterval;
+            timer += Time.deltaTime;
+            if (timer >= cooldown) { Shoot(); timer = 0f; }
         }
+
+        public void ForceEvolveFireball() { isEvolved = true; }
 
         void Shoot()
         {
-            GameObject targetObj = FindNearestEnemy();
+            GameObject prefab = (isEvolved && evolvedPrefab != null) ? evolvedPrefab : fireballPrefab;
+            GameObject target = FindNearestEnemy();
+            Vector3 dir = target != null ? (target.transform.position - transform.position).normalized : transform.right;
 
-            Vector3 shootDir = targetObj != null ?
-                (targetObj.transform.position - transform.position).normalized :
-                transform.right;
-
-            float angle = Mathf.Atan2(shootDir.y, shootDir.x) * Mathf.Rad2Deg;
-            Quaternion spawnRotation = Quaternion.Euler(0, 0, angle);
-
-            GameObject go = Instantiate(fireballPrefab, transform.position, spawnRotation);
-            go.transform.SetParent(null);
-
+            GameObject go = Instantiate(prefab, transform.position, Quaternion.identity);
             Projectile proj = go.GetComponent<Projectile>();
+
             if (proj != null)
             {
-                // 😤 [폭발형 지정]
                 proj.type = Projectile.ProjectileType.Explosion;
+                float finalDmg = (stats != null) ? damage * stats.damageMultiplier : damage;
 
-                // 😤 [강화 로직] 1.5배 복리 배율 계산
-                float multiplier = Mathf.Pow(1.5f, skillData.level);
-
-                // Setup의 4번째 인자로 multiplier 전달
-                proj.Setup(shootDir, damage, projectileSpeed, multiplier, targetObj != null ? targetObj.transform : null);
+                // 😤 인자 3개: (방향, 데미지, 속도) - 사이즈 배율은 아예 안 보냄
+                proj.Setup(dir, finalDmg, projectileSpeed);
             }
         }
 
@@ -64,16 +56,11 @@ namespace Survivor
         {
             GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
             GameObject nearest = null;
-            float minDistance = Mathf.Infinity;
-
-            foreach (GameObject enemy in enemies)
+            float minDist = Mathf.Infinity;
+            foreach (var e in enemies)
             {
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearest = enemy;
-                }
+                float dist = Vector3.Distance(transform.position, e.transform.position);
+                if (dist < minDist) { minDist = dist; nearest = e; }
             }
             return nearest;
         }

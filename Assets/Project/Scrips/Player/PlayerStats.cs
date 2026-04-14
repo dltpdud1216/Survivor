@@ -27,6 +27,8 @@ namespace Survivor
 
         [Header("UI Reference")]
         [SerializeField] private SkillSelectionUIManager uiManager;
+        // 😤 게임오버 패널 참조 추가
+        [SerializeField] private GameObject gameOverPanel;
 
         void Awake() { currentHP = maxHP; }
         void Start() { if (hpBar != null) hpBar.UpdateHPBar(currentHP, maxHP); }
@@ -35,7 +37,7 @@ namespace Survivor
         {
             switch (itemID)
             {
-                case 103: // 😤 자석 범위 업그레이드 (ID 103 확인 완료!)
+                case 103:
                     magnetRange += 2.0f;
                     Debug.Log($"자석 수치 증가: {magnetRange}");
                     break;
@@ -50,7 +52,7 @@ namespace Survivor
 
         public void TakeDamage(float damage)
         {
-            if (damage <= 0) return;
+            if (damage <= 0 || currentHP <= 0) return; // 😤 이미 죽었으면 무시
             currentHP -= damage;
             currentHP = Mathf.Clamp(currentHP, 0, maxHP);
             if (hpBar != null) hpBar.UpdateHPBar(currentHP, maxHP);
@@ -73,6 +75,15 @@ namespace Survivor
             if (uiManager != null) uiManager.ShowRandomSkillSelection();
         }
 
-        void Die() { Time.timeScale = 0f; Debug.Log("사망"); }
+        // 😤 게임오버 처리
+        void Die()
+        {
+            Debug.Log("사망");
+            Time.timeScale = 0f; // 게임 정지
+            if (gameOverPanel != null)
+            {
+                gameOverPanel.SetActive(true); // 게임오버 창 띄우기
+            }
+        }
     }
 }

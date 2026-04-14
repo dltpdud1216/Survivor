@@ -13,6 +13,8 @@ namespace Survivor
         private GameObject Market;
         [SerializeField]
         private GameObject Dungen;
+        [SerializeField]
+        private GameObject CheetBook;
 
 
         public void OnOption()
@@ -33,6 +35,17 @@ namespace Survivor
         public void OffInventory()
         {
             Inventory.SetActive(false);
+        }
+        public void OnCheet()
+        {
+            if (CheetBook != null)
+            {
+                CheetBook.SetActive(!CheetBook.activeSelf);
+            }
+        }
+        public void OffCheet()
+        {
+            CheetBook.SetActive(false);
         }
         public void OnMarket()
         {

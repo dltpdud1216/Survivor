@@ -1,0 +1,296 @@
+fileFormatVersion: 2
+guid: e57f18e3d578fab4b96332c1dc997c2f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2231150655367811619
+    second: gameover_transparent_v2_0
+  - first:
+      213: 521830439171131465
+    second: gameover_transparent_v2_1
+  - first:
+      213: 4453917800934906961
+    second: gameover_transparent_v2_2
+  - first:
+      213: -3036403037257464628
+    second: gameover_transparent_v2_3
+  - first:
+      213: -3471506275746052884
+    second: gameover_transparent_v2_4
+  - first:
+      213: -6611495458198873731
+    second: gameover_transparent_v2_5
+  - first:
+      213: -3761622455664610117
+    second: gameover_transparent_v2_6
+  - first:
+      213: -1728098738130375970
+    second: gameover_transparent_v2_7
+  - first:
+      213: -7373852528783872192
+    second: gameover_transparent_v2_8
+  - first:
+      213: 1351789438326014971
+    second: gameover_transparent_v2_9
+  - first:
+      213: -5521422868958109965
+    second: gameover_transparent_v2_10
+  - first:
+      213: 644389743742402993
+    second: gameover_transparent_v2_11
+  - first:
+      213: -1799543839921242011
+    second: gameover_transparent_v2_12
+  - first:
+      213: 5155015006584928547
+    second: gameover_transparent_v2_13
+  - first:
+      213: -5973020741654501683
+    second: gameover_transparent_v2_14
+  - first:
+      213: -1248323573160682992
+    second: gameover_transparent_v2_15
+  - first:
+      213: 9077446596426991686
+    second: gameover_transparent_v2_16
+  - first:
+      213: -5100997043933275968
+    second: gameover_transparent_v2_17
+  - first:
+      213: -8020330094147959164
+    second: gameover_transparent_v2_18
+  - first:
+      213: -5824391271414217186
+    second: gameover_transparent_v2_19
+  - first:
+      213: -23675799413496971
+    second: gameover_transparent_v2_20
+  - first:
+      213: 2537708243220239387
+    second: gameover_transparent_v2_21
+  - first:
+      213: 5906082510939032962
+    second: gameover_transparent_v2_22
+  - first:
+      213: 1055920238564016796
+    second: gameover_transparent_v2_23
+  - first:
+      213: -4709808470601667374
+    second: gameover_transparent_v2_24
+  - first:
+      213: 7259338368942830424
+    second: gameover_transparent_v2_25
+  - first:
+      213: 7900265864442802092
+    second: gameover_transparent_v2_26
+  - first:
+      213: -8141159379283917259
+    second: gameover_transparent_v2_27
+  - first:
+      213: 8033004467600419264
+    second: gameover_transparent_v2_28
+  - first:
+      213: -6174516236948870720
+    second: gameover_transparent_v2_29
+  - first:
+      213: 5355216292702847950
+    second: gameover_transparent_v2_30
+  - first:
+      213: 8663161666854714893
+    second: gameover_transparent_v2_31
+  - first:
+      213: -6082834049289876986
+    second: gameover_transparent_v2_32
+  - first:
+      213: -4164956087516758190
+    second: gameover_transparent_v2_33
+  - first:
+      213: 4687583120329654027
+    second: gameover_transparent_v2_34
+  - first:
+      213: -2940665208640884763
+    second: gameover_transparent_v2_35
+  - first:
+      213: 4239530204522291153
+    second: gameover_transparent_v2_36
+  - first:
+      213: 667360756192246743
+    second: gameover_transparent_v2_37
+  - first:
+      213: 8904800777962861785
+    second: gameover_transparent_v2_38
+  - first:
+      213: 3929478957641304609
+    second: gameover_transparent_v2_39
+  - first:
+      213: -4176294995562209785
+    second: gameover_transparent_v2_40
+  - first:
+      213: 8627608020791136747
+    second: gameover_transparent_v2_41
+  - first:
+      213: -7185361444946899635
+    second: gameover_transparent_v2_42
+  - first:
+      213: -6799102514670828373
+    second: gameover_transparent_v2_43
+  - first:
+      213: -2685025431763166325
+    second: gameover_transparent_v2_44
+  - first:
+      213: -1192310537996190654
+    second: gameover_transparent_v2_45
+  - first:
+      213: 5675249517669383508
+    second: gameover_transparent_v2_46
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: gameover_transparent_v2_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1118
+        width: 1140
+        height: 1832
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 322149d23b3a6fe10800000000000000
+      internalID: 2231150655367811619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ef8df27e7bbd2ae4bb0bf6d858ec3cf8
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":1140.0,"y":3140.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      gameover_transparent_v2_0: 2231150655367811619
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -9,6 +9,8 @@ namespace Survivor
         public float hp = 100f;
         public float speed = 3f;
         public int level = 1;
+        public float damage = 10f;        // 😤 플레이어에게 줄 데미지
+        public float attackDelay = 0.5f; // 😤 데미지 주기 (0.5초마다)
 
         [Header("Item Drop Settings")]
         public GameObject itemPrefab;
@@ -16,6 +18,7 @@ namespace Survivor
 
         [Header("Visual Feedback")]
         public Color hitColor = Color.red;
+        public Color freezeColor = Color.blue; // 😤 빙결 시 변할 색상
         public float flashDuration = 0.1f;
 
         private float currentSpeed;
@@ -24,6 +27,9 @@ namespace Survivor
         private SpriteRenderer spriteRenderer;
         private Color originalColor;
         private Rigidbody2D rb;
+
+        private float lastAttackTime; // 마지막 공격 시간 체크
+        private bool isFrozen = false; // 😤 현재 빙결 상태인지 체크
 
         void Start()
         {
@@ -43,7 +49,11 @@ namespace Survivor
 
         void FixedUpdate()
         {
-            if (player == null) return;
+            if (player == null || isFrozen) // 😤 빙결 상태면 이동 중지
+            {
+                if (isFrozen && rb != null) rb.linearVelocity = Vector2.zero;
+                return;
+            }
 
             Vector3 direction = player.position - transform.position;
             direction.z = 0;
@@ -51,7 +61,6 @@ namespace Survivor
 
             if (rb != null)
             {
-                // 플레이어가 밀어도 굴하지 않고 내 갈 길 가는 로직 😤
                 rb.linearVelocity = moveDir * currentSpeed;
             }
             else
@@ -61,17 +70,39 @@ namespace Survivor
 
             if (moveDir.x != 0)
             {
-                // 뒷걸음질 방지 로직 😤
                 float flipX = moveDir.x > 0 ? Mathf.Abs(originScale.x) : -Mathf.Abs(originScale.x);
                 transform.localScale = new Vector3(flipX, originScale.y, originScale.z);
+            }
+        }
+
+        // 😤 [플레이어와 충돌 중일 때 데미지 주기]
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                if (Time.time >= lastAttackTime + attackDelay)
+                {
+                    if (collision.gameObject.TryGetComponent<PlayerStats>(out PlayerStats stats))
+                    {
+                        stats.TakeDamage(damage);
+                        lastAttackTime = Time.time;
+                        Debug.Log($"💥 플레이어 피격! 남은 체력: {stats.currentHP}");
+                    }
+                }
             }
         }
 
         public void TakeDamage(float dmg)
         {
             hp -= dmg;
-            StopCoroutine("HitFlashRoutine");
-            StartCoroutine("HitFlashRoutine");
+
+            // 😤 빙결 중에는 히트 플래시(빨간색)를 잠시 끄거나 색이 겹치지 않게 처리
+            if (!isFrozen)
+            {
+                StopCoroutine("HitFlashRoutine");
+                StartCoroutine("HitFlashRoutine");
+            }
+
             if (hp <= 0) Die();
         }
 
@@ -81,7 +112,8 @@ namespace Survivor
             {
                 spriteRenderer.color = hitColor;
                 yield return new WaitForSeconds(flashDuration);
-                spriteRenderer.color = originalColor;
+                if (!isFrozen) spriteRenderer.color = originalColor;
+                else spriteRenderer.color = freezeColor;
             }
         }
 
@@ -91,12 +123,39 @@ namespace Survivor
             {
                 Instantiate(itemPrefab, transform.position, Quaternion.identity);
             }
+
+            if (MonsterKillCounter.Instance != null)
+            {
+                MonsterKillCounter.Instance.AddKill();
+            }
+
             Destroy(gameObject);
+        }
+
+        // 😤 [추가 핵심] 프로스트 볼에 맞았을 때 호출할 함수
+        public void ApplyFreeze(float duration)
+        {
+            StartCoroutine(FreezeRoutine(duration));
+        }
+
+        private IEnumerator FreezeRoutine(float duration)
+        {
+            isFrozen = true;
+            currentSpeed = 0;
+
+            if (spriteRenderer != null) spriteRenderer.color = freezeColor;
+
+            yield return new WaitForSeconds(duration);
+
+            isFrozen = false;
+            currentSpeed = speed;
+
+            if (spriteRenderer != null) spriteRenderer.color = originalColor;
         }
 
         public void ApplySlow(float amount, float duration)
         {
-            StopAllCoroutines();
+            if (isFrozen) return; // 빙결 중이면 슬로우 무시
             StartCoroutine(SlowRoutine(amount, duration));
         }
 
@@ -104,7 +163,7 @@ namespace Survivor
         {
             currentSpeed = speed * (1f - amount);
             yield return new WaitForSeconds(duration);
-            currentSpeed = speed;
+            if (!isFrozen) currentSpeed = speed;
         }
     }
 }

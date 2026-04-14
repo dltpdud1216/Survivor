@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -35,9 +36,21 @@ namespace Survivor
             RefreshPlayerReference();
         }
 
+        private void Start()
+        {
+            StartCoroutine(ShowInitialSkillSelection());
+        }
+
+        private IEnumerator ShowInitialSkillSelection()
+        {
+            yield return new WaitForSecondsRealtime(0.1f);
+            ShowRandomSkillSelection();
+        }
+
         public void ShowRandomSkillSelection()
         {
-            if (skillPanel != null) skillPanel.SetActive(true);
+            if (skillPanel == null) return;
+            skillPanel.SetActive(true);
             Time.timeScale = 0f;
             RefreshPlayerReference();
 
@@ -46,7 +59,11 @@ namespace Survivor
                 .ToList();
 
             var normalPool = allSkillDatabase.Where(s => s != null && s.type != SkillType.Evolution && s.level < 4).ToList();
-            List<SkillData> filteredPool = !isFirstSelectionDone ? normalPool.Where(s => s.type == SkillType.Active).ToList() : normalPool.Concat(evolvableSkills).ToList();
+            List<SkillData> filteredPool = !isFirstSelectionDone
+                ? normalPool.Where(s => s.type == SkillType.Active).ToList()
+                : normalPool.Concat(evolvableSkills).ToList();
+
+            if (filteredPool.Count == 0) { ResumeGame(); return; }
 
             int count = Mathf.Min(skillChoiceButtons.Count, filteredPool.Count);
             currentOptions = filteredPool.OrderBy(x => Random.value).Take(count).ToList();
@@ -63,18 +80,38 @@ namespace Survivor
         private void UpdateUIAndListeners()
         {
             foreach (var btn in skillChoiceButtons) btn.gameObject.SetActive(false);
+
             for (int i = 0; i < currentOptions.Count; i++)
             {
                 SkillData data = currentOptions[i];
                 skillChoiceButtons[i].gameObject.SetActive(true);
-                var iconImage = skillChoiceButtons[i].GetComponentsInChildren<Image>(true).FirstOrDefault(x => x.gameObject.name == "Icon");
+
+                // 😤 1. 아이콘 연동 (자식 중 "Icon"이라는 이름의 이미지 찾기)
+                var iconImage = skillChoiceButtons[i].GetComponentsInChildren<Image>(true)
+                    .FirstOrDefault(x => x.gameObject.name == "Icon");
                 if (iconImage != null) iconImage.sprite = data.skillIcon;
+
+                // 😤 2. [핵심] 스킬 이름 연동
+                // 버튼 자식 중 TextMeshProUGUI 컴포넌트를 가진 놈을 찾아 내용을 스킬 이름으로 바꿈
+                var nameText = skillChoiceButtons[i].GetComponentInChildren<TextMeshProUGUI>(true);
+                if (nameText != null)
+                {
+                    nameText.text = data.skillName;
+                }
+
                 skillChoiceButtons[i].onClick.RemoveAllListeners();
                 skillChoiceButtons[i].onClick.AddListener(() => OnSkillSelected(data));
             }
         }
 
         public void OnSkillSelected(SkillData selected)
+        {
+            ApplySkillEffects(selected);
+            isFirstSelectionDone = true;
+            ResumeGame();
+        }
+
+        public void ApplySkillEffects(SkillData selected)
         {
             if (playerObject == null) RefreshPlayerReference();
 
@@ -84,11 +121,18 @@ namespace Survivor
                 if (materialActive != null)
                 {
                     string className = GetTargetClassName(materialActive.skillName);
-                    var script = playerObject.GetComponent(className);
 
-                    // 😤 여기서 직접 데이터를 주입하고 교체 함수를 때려버립니다.
-                    if (script is MlasmaSkill mlasma) { mlasma.skillData = selected; mlasma.ForceEvolveMlasma(); }
-                    else if (script is SpinningBladeSkill blade) { blade.skillData = selected; blade.ForceEvolveBlade(); }
+                    if (className == "FireballSkill" && FireballSkill.Instance != null)
+                    {
+                        FireballSkill.Instance.skillData = selected;
+                        FireballSkill.Instance.ForceEvolveFireball();
+                    }
+                    else
+                    {
+                        var script = playerObject.GetComponent(className);
+                        if (script is MlasmaSkill mlasma) { mlasma.skillData = selected; mlasma.ForceEvolveMlasma(); }
+                        else if (script is SpinningBladeSkill blade) { blade.skillData = selected; blade.ForceEvolveBlade(); }
+                    }
                 }
                 selected.level = 1;
             }
@@ -100,8 +144,6 @@ namespace Survivor
             }
 
             if (SkillInventoryUI.Instance != null) SkillInventoryUI.Instance.RefreshUI(selected);
-            isFirstSelectionDone = true;
-            ResumeGame();
         }
 
         private string GetTargetClassName(string displayName)
@@ -128,7 +170,10 @@ namespace Survivor
             if (playerObject != null) playerStats = playerObject.GetComponent<PlayerStats>();
         }
 
-        private void SetupButtons() { foreach (var btn in skillChoiceButtons) btn.gameObject.SetActive(false); }
-        private void ResumeGame() { if (skillPanel != null) skillPanel.SetActive(false); Time.timeScale = 1f; }
+        public void ResumeGame()
+        {
+            if (skillPanel != null) skillPanel.SetActive(false);
+            Time.timeScale = 1f;
+        }
     }
 }
